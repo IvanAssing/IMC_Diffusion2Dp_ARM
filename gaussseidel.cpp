@@ -1,5 +1,8 @@
 #include "gaussseidel.h"
 
+#include <stdlib.h>
+
+
 GaussSeidel::GaussSeidel(tFloat *results, tInteger equationMax, tInteger iterationMax, tFloat iterationTolerance, tInteger bandWidth)
     :x(results), neqmax(equationMax), itol(iterationTolerance), imax(iterationMax), bwidth(bandWidth)
 {
@@ -59,6 +62,8 @@ void GaussSeidel::solver()
 {
     tFloat sum, residual;
 
+    this->diagonalcheck();
+
     do{
         // Solver
         for(tInteger i = 0; i<neqmax; i++){
@@ -81,7 +86,105 @@ void GaussSeidel::solver()
         std::cout<<"\n"<<nit<<"\t"<<print(L[nit]);
 
     }while(L[nit] > itol && nit++ < imax);
+
+    for(tInteger i=0; i<nswap; i++)
+    {
+        tFloat swap = x[vswap[i][0]];
+        x[vswap[i][0]] = x[vswap[i][1]];
+        x[vswap[i][1]] = swap;
+    }
+
 }
+
+#define DIV0_TOL 1.0e-25
+
+
+
+void GaussSeidel::diagonalcheck(void)
+{
+    nswap = 0;
+    for(tInteger i=0; i<neqmax; i++)
+        if(fabsq(ax[i]) < DIV0_TOL)
+        {
+            for(tInteger k=0; k<neIndex[i]; k++)
+                for(tInteger q=0; q<neIndex[AIndex[i][k]]; q++)
+                    if(i == AIndex[AIndex[i][k]][q])
+                    {
+                        tInteger t = AIndex[i][k];
+
+
+                        vswap[nswap][0] = i;
+                        vswap[nswap++][1] = t;
+
+                        tInteger ni = neIndex[i];
+                        tInteger nt = neIndex[t];
+
+                        tInteger AIi[100], AIt[100];
+                        tFloat Ai[100], At[100];
+
+                        for(tInteger kk=0; kk<neIndex[i]; kk++)
+                        {
+                            AIi[kk] = AIndex[i][kk];
+                            Ai[kk] = A[i][kk];
+                        }
+
+                        for(tInteger kk=0; kk<neIndex[t]; kk++)
+                        {
+                            AIt[kk] = AIndex[t][kk];
+                            At[kk] = A[t][kk];
+                        }
+
+                        neIndex[i] = 0;
+
+                        this->operator ()(i, t, ax[t]);
+                        for(tInteger kk=0; kk<nt; kk++)
+                            if(AIt[kk] != i)
+                                this->operator ()(i, AIt[kk], At[kk]);
+                            else
+                                this->operator ()(i, i, At[kk]);
+
+                        neIndex[t] = 0;
+
+                        this->operator ()(t, i, ax[i]);
+                        for(tInteger kk=0; kk<ni; kk++)
+                            if(AIi[kk] != t)
+                                this->operator ()(t, AIi[kk], Ai[kk]);
+                            else
+                                this->operator ()(t, t, Ai[kk]);
+
+
+
+
+                        tFloat swap = b[t];
+                        b[t] = b[i];
+                        b[i] = swap;
+
+
+                        swap = x[t];
+                        x[t] = x[i];
+                        x[i] = swap;
+
+
+
+
+
+
+                    }
+                    else
+                        std::cout<<"ERRO";
+        }
+}
+
+//tInteger GaussSeidel::findSwap(tInteger pivot, tInteger column)
+//{
+//    for(tInteger i=0; i<neqmax; i++)
+//        for(tInteger k=0; k<neIndex[i]; k++)
+//            if(column == AIndex[i][k])
+//                for(tInteger kk=0; kk<neIndex[i]; kk++)
+//                    if(pivot == AIndex[i][kk])
+//                        return i;
+//    return -1;
+//}
 
 void GaussSeidel::plotIterationLog()
 {
@@ -116,4 +219,15 @@ void GaussSeidel::plotIterationLog()
 
     std::system(cmd1.c_str());
     std::system(cmd2.c_str());
+}
+
+void GaussSeidel::printindex()
+{
+    for(tInteger i = 0; i<neqmax; i++)
+    {
+        std::cout<<"\n"<<i<<"\t"<<print(ax[i]);
+        for(tInteger j=0; j<neIndex[i]; j++)
+            std::cout<<"\t"<<AIndex[i][j];
+    }
+
 }

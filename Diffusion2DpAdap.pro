@@ -19,7 +19,10 @@ SOURCES += main.cpp \
     boundary2d.cpp \
     data.cpp \
     gaussseidel.cpp \
-    graphics.cpp
+    graphics.cpp \
+    diffusion2dpar.cpp \
+    element2d.cpp \
+    solverlu.cpp
 
 HEADERS += \
     node2d.h \
@@ -29,7 +32,10 @@ HEADERS += \
     boundary2d.h \
     data.h \
     gaussseidel.h \
-    graphics.h
+    graphics.h \
+    diffusion2dpar.h \
+    element2d.h \
+    solverlu.h
 
 FORMS +=
 

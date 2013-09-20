@@ -20,6 +20,8 @@ class GaussSeidel
         tFloat *L; // Resíduos
         tFloat itol; // Tolerância mímima sobre resíduo
         tInteger nit;
+        tInteger vswap[100][2];
+        tInteger nswap;
 
         tInteger bwidth; // Largura da matriz de banda
         tInteger neqmax; // Número máximo de equações
@@ -31,7 +33,11 @@ class GaussSeidel
         void operator()(tInteger equation, tInteger index, tFloat value);
         void operator()(tInteger equation, tFloat b);
 
+        void diagonalcheck(void);
+
         void solver();
+
+        void printindex();
 
         void plotIterationLog();
 };

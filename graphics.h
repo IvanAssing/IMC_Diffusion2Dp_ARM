@@ -8,17 +8,18 @@
 #include <QCursor>
 
 #include "diffusion2dp.h"
+#include "diffusion2dpar.h"
 
 class Graphics : public QGLWidget
 {
         Q_OBJECT
     public:
-        explicit Graphics(QWidget *parent = 0);
+        explicit Graphics(Diffusion2DpAR *mesh, tFloat *X, QString str, QWidget *parent = 0);
 
         double xmax, xmin, ymax, ymin, panX, panY;
         bool isMousePress;
 
-        Diffusion2Dp *mesh;
+        Diffusion2DpAR *mesh;
         tFloat *X;
 
         void drawLegend(double T0, double T1, double T2, double T3, double T4);

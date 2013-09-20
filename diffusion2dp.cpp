@@ -11,9 +11,9 @@ Diffusion2Dp::Diffusion2Dp(tFloat _lx, tFloat _ly, tInteger _nx, tInteger _ny, D
     nodes = new Node2D[nx*ny]();
     tInteger p = 0;
 
-    for(tInteger j=0; j<ny; j++)
-        for(tInteger i=0; i<nx; i++)
-            nodes[p] = Node2D(i*hx, j*hy, i, j, p++);
+//    for(tInteger j=0; j<ny; j++)
+//        for(tInteger i=0; i<nx; i++)
+//            nodes[p] = Node2D(i*hx, j*hy, i, j, p++);
 
     T = new tFloat[nx*ny];
 
@@ -93,14 +93,7 @@ void Diffusion2Dp::solver(tInteger iterationMax, tFloat iterationTolerance, bool
             sys(p, -2.0q*hx*ccW->bcValue->operator ()(nodes[p].x, nodes[p].y)/data->k);
         }
 
-
     sys.solver();
-
-    SFAS as(1.0q, 1.0q);
-
-    for(tInteger i=0; i<nx*ny; i++)
-        std::cout<<"\n"<<i<<"\t"<<print(T[i])<<"\t"<<print(as(nodes[i].x, nodes[i].y))<<"\t"<<print(as(nodes[i].x, nodes[i].y)-T[i]);
-
 
     Tm = 0.0q;
     int p;
@@ -113,8 +106,8 @@ void Diffusion2Dp::solver(tInteger iterationMax, tFloat iterationTolerance, bool
 
     if(plotlog)
         sys.plotIterationLog();
-
 }
+
 
 tInteger Diffusion2Dp::position(tInteger i, tInteger j)
 {
@@ -154,6 +147,7 @@ tInteger Diffusion2Dp::direction(tInteger position, DirectionType dir)
         break;
     }
 }
+
 
 tFloat Diffusion2Dp::operator()(tInteger i, tInteger j)
 {
