@@ -14,8 +14,8 @@ class Diffusion2DpAR
 {
     public:
         Diffusion2DData *data; // Dados do problema
-        Node2D *nodes; // Lista de nós
-        Element2D *elements; // Lista de elementos
+        Node2D **nodes; // Lista de nós
+        Element2D **elements; // Lista de elementos
         tInteger nx, ny; // Número de divisões em x e y
         tFloat lx, ly, hx, hy; // Tamanho de malha
         Boundary2D *ccS, *ccN, *ccE, *ccW; // Condições de contorno
@@ -27,6 +27,8 @@ class Diffusion2DpAR
                      Boundary2D *ccSouth, Boundary2D *ccNorth, Boundary2D *ccEast, Boundary2D *ccWest);
 
         void solver(tInteger iterationMax = 1000, tFloat iterationTolerance = 1.0e-28q, bool plotlog = false); // Discretização + solver do sistema linear
+        void solver2(tInteger iterationMax = 1000, tFloat iterationTolerance = 1.0e-28q, bool plotlog = false); // Discretização + solver do sistema linear
+        void solver3(tInteger iterationMax = 1000, tFloat iterationTolerance = 1.0e-28q, bool plotlog = false); // Discretização + solver do sistema linear
 
         tInteger direction(tInteger position, DirectionType dir);
         Node2D* nodeDirection(tInteger position, DirectionType dir);
@@ -34,6 +36,9 @@ class Diffusion2DpAR
 
         void refine(Element2D *element);
         void refine(Node2D *node);
+
+
+        void updateTm(void);
 };
 
 #endif // DIFFUSION2DPAR_H

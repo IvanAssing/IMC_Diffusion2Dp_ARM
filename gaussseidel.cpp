@@ -62,8 +62,6 @@ void GaussSeidel::solver()
 {
     tFloat sum, residual;
 
-    this->diagonalcheck();
-
     do{
         // Solver
         for(tInteger i = 0; i<neqmax; i++){
@@ -86,13 +84,6 @@ void GaussSeidel::solver()
         std::cout<<"\n"<<nit<<"\t"<<print(L[nit]);
 
     }while(L[nit] > itol && nit++ < imax);
-
-    for(tInteger i=0; i<nswap; i++)
-    {
-        tFloat swap = x[vswap[i][0]];
-        x[vswap[i][0]] = x[vswap[i][1]];
-        x[vswap[i][1]] = swap;
-    }
 
 }
 

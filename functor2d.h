@@ -31,7 +31,7 @@ class Sine : public Functor2D
 
         Sine(tFloat _a, tFloat _b, tFloat _c):a(_a), b(_b), c(_c){}
 
-        tFloat operator()(tFloat x, tFloat y)
+        tFloat operator()(tFloat x, tFloat)
         {
             return a*sinq(b*x+c);
         }

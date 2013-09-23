@@ -12,6 +12,9 @@ class GaussSeidel
         tInteger **AIndex; // Matriz de indices
         tInteger *neIndex; // Número de termos por linha
 
+        tInteger neqmax; // Número máximo de equações
+        tInteger imax; // Número máximo de iterações
+
 
         tFloat **A; // Coeficientes
         tFloat *x; // Resultados
@@ -24,8 +27,6 @@ class GaussSeidel
         tInteger nswap;
 
         tInteger bwidth; // Largura da matriz de banda
-        tInteger neqmax; // Número máximo de equações
-        tInteger imax; // Número máximo de iterações
 
 
         GaussSeidel(tFloat *results, tInteger equationMax, tInteger iterationMax = 100, tFloat iterationTolerance = 1.0e-28q, tInteger bandWidth = 5);
@@ -40,6 +41,28 @@ class GaussSeidel
         void printindex();
 
         void plotIterationLog();
+
+        virtual ~GaussSeidel()
+        {
+            delete [] neIndex;
+
+
+            for(tInteger i = 0; i<neqmax; i++)
+                delete [] AIndex[i];
+
+            delete [] AIndex;
+
+
+            delete [] ax;
+            delete [] b;
+            delete [] L;
+
+            for(tInteger i = 0; i<neqmax; i++)
+                delete [] A[i];
+
+            delete [] A;
+
+        }
 };
 
 #endif // GAUSSSEIDEL_H

@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-   // MANAGE_EXCEPTIONS
+    // MANAGE_EXCEPTIONS
 
     Diffusion2DData data;
 
@@ -22,75 +22,86 @@ int main(int argc, char *argv[])
 
 
     Constant2D cc0(0.0);
-    Constant2D cc1(1.0);
-    Constant2D cc2(-1.0);
 
     Sine ccS(1.0q, M_PIq, 0.0q);
 
-    // Condições de contorno do problema 7.1
     Boundary2D south(Dirichlet, &cc0);
     Boundary2D north(Dirichlet, &ccS);
     Boundary2D east(Dirichlet, &cc0);
     Boundary2D west(Dirichlet, &cc0);
 
-    //Condições de contorno de Neumann
-    //Boundary2D east(Neumann, &cc0);
-    //Boundary2D west(Neumann, &cc0);
-    //Boundary2D south(Dirichlet, &cc0);
-    //Boundary2D north(Dirichlet, &cc1);
 
     tFloat lx = 1.0q;
     tFloat ly = 1.0q;
-    tInteger nx = 11;
-    tInteger ny = 11;
+    tInteger nx = 5;
+    tInteger ny = 5;
 
     tFloat TmAS = 2.0q*lx * (coshq(M_PIq*ly/lx) - 1.0q) / (M_PIq*M_PIq*ly*sinhq(M_PIq*ly/lx));
     Diffusion2DpAR mesh(lx, ly, nx, ny, &data, &south, &north, &east, &west);
 
-    mesh.solver(100000, 1.0e-28q, true); // itmax, itol, plotlog?
 
     SFAS as(1.0q, 1.0q);
 
-//    mesh.plotX(ny/2, as);
-//    mesh.plotY(nx/2, as);
-//    mesh.plot(as);
+    // 1
+    mesh.solver3(100000, 1.0e-28q, true); // itmax, itol, plotlog?
+    mesh.updateTm();
+    std::cout<<"\n *** TM: "<<mesh.nnodes<<"\t"<<print(mesh.Tm)<<"\t"<<print(TmAS)<<"\t"<<print(TmAS-mesh.Tm);
+
+
+    tInteger nne = mesh.nelements;
+
+
+    for(int z=0; z<3; z++)
+    {
+        nne = mesh.nelements;
+        for(int k=0; k<nne; k++)
+        {
+            if(mesh.elements[k]->index == -1) continue;
+
+            tFloat Ta = 0.0q, Tn = 0.0q;
+
+            for(tInteger i=0; i<4; i++)
+            {
+                Tn += mesh.T[mesh.elements[k]->nodes[i]->index]/4.0q;
+                Ta += as(mesh.elements[k]->nodes[i]->x, mesh.elements[k]->nodes[i]->y)/4.0q;
+            }
+
+            if(fabsq(Ta - Tn)>1.0e-5q)
+                mesh.refine(mesh.elements[k]);
+        }
+
+
+        std::cout<<"\n *** TM: "<<mesh.nnodes<<std::flush;
+        mesh.solver3(100000, 1.0e-28q, true); // itmax, itol, plotlog?
+        mesh.updateTm();
+        std::cout<<"\t"<<print(mesh.Tm)<<"\t"<<print(TmAS)<<"\t"<<print(TmAS-mesh.Tm);
+    }
+
+
 
     tFloat *erro = new tFloat[mesh.nnodes];
 
     // Erro númerico
     for(int i=0; i<mesh.nnodes; i++)
     {
-        erro[i] = fabsq(as(mesh.nodes[i].x, mesh.nodes[i].y)-mesh.T[i]);
-        std::cout<<"\n"<<i<<"\t"<<print(as(mesh.nodes[i].x, mesh.nodes[i].y))<<"\t"<<print(mesh.T[i])<<"\t"<<print(erro[i]);
+        erro[i] = fabsq(as(mesh.nodes[i]->x, mesh.nodes[i]->y)-mesh.T[i]);
+        //std::cout<<"\n"<<i<<"\t"<<print(as(mesh.nodes[i]->x, mesh.nodes[i]->y))<<"\t"<<print(mesh.T[i])<<"\t"<<print(erro[i]);
     }
 
-//    // Gerar mapa de cores
-//    Graphics w1, w2;
-//    w1.mesh = &mesh;
-//    w1.X = mesh.T;
-//    w2.mesh = &mesh;
-//    w2.X = erro;
-//    w1.show();
-//    w2.show();
 
-    Graphics w1(&mesh, mesh.T, QString("Temperatura"));
-    w1.show();
+    Graphics w11(&mesh, mesh.T, QString("Temperatura"));
+    w11.show();
 
     Graphics w2(&mesh, erro, QString("Erro"));
     w2.show();
 
-    int nn = 82;
+    int nn = 10;
 
     // Resultados númericos
-    std::cout<<"\n\nT("<<QtoD(mesh.nodes[nn].x)<<", "<<QtoD(mesh.nodes[nn].y)<<"):";
+    std::cout<<"\n\nT("<<QtoD(mesh.nodes[nn]->x)<<", "<<QtoD(mesh.nodes[nn]->y)<<"):";
     std::cout<<std::setw(15)<<std::right<<"\nNumérica: "<<print(mesh.T[nn]);
-    std::cout<<std::setw(15)<<std::right<<"\nAnalítica: "<<print(as(mesh.nodes[nn].x, mesh.nodes[nn].y));
-    std::cout<<std::setw(15)<<std::right<<"\nErro: "<<print(as(mesh.nodes[nn].x, mesh.nodes[nn].y) - mesh.T[nn])<<std::endl;
-
-//    std::cout<<"\n\nTemperatura Média: "<<std::setfill(' ');
-//    std::cout<<std::setw(15)<<std::right<<"\nNumérica: "<<print(mesh.Tm);
-//    std::cout<<std::setw(15)<<std::right<<"\nAnalítica: "<<print(TmAS);
-//    std::cout<<std::setw(15)<<std::right<<"\nErro: "<<print(TmAS - mesh.Tm)<<std::endl;
+    std::cout<<std::setw(15)<<std::right<<"\nAnalítica: "<<print(as(mesh.nodes[nn]->x, mesh.nodes[nn]->y));
+    std::cout<<std::setw(15)<<std::right<<"\nErro: "<<print(as(mesh.nodes[nn]->x, mesh.nodes[nn]->y) - mesh.T[nn])<<std::endl;
 
     //END_EXCEPTIONS
 

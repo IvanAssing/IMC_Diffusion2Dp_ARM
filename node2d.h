@@ -8,8 +8,9 @@
 class Node2D
 {
     public:
-        tFloat x, y;
         tInteger index;
+        tFloat x, y;
+
         Node2D **nodes;
         Boundary2D *boundary;
 

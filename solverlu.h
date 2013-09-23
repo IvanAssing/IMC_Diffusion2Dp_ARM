@@ -1,4 +1,4 @@
-#ifndef SOLVERLU_H
+﻿#ifndef SOLVERLU_H
 #define SOLVERLU_H
 
 #include "imc_dfm.h"
@@ -23,6 +23,17 @@ class SolverLU
         void solver();
 
         void printindex();
+
+//        ~SolverLU()
+//        {
+
+//            for(tInteger i = 0; i<neqmax; i++)
+//                delete [] A[i];
+
+//            delete [] A;
+//            delete [] b;
+
+//        }
 
 };
 

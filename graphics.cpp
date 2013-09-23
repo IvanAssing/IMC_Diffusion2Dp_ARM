@@ -185,11 +185,7 @@ void Graphics::paintGL()
     glColor4d(1.0, 1.0, 1.0, 1.0);
     glBegin(GL_POINTS);
     for(int i=0; i<mesh->nnodes; i++){
-        if(mesh->nodes[i].boundary == NULL)
-            glColor4d(1.0, 1.0, 1.0, 1.0);
-        else
-            glColor4d(0.0, 0.0, 0.0, 1.0);
-        glVertex2d(QtoD(mesh->nodes[i].x), QtoD(mesh->nodes[i].y));
+        glVertex2d(QtoD(mesh->nodes[i]->x), QtoD(mesh->nodes[i]->y));
     }
     glEnd();
 
@@ -214,17 +210,31 @@ void Graphics::paintGL()
     //    glBegin(GL_POINTS);
 
     //    for(int i=0; i<mesh->nnodes; i++){
-    //        if(mesh->nodes[i].nodes[0] == NULL ||
-    //                mesh->nodes[i].nodes[1] == NULL ||
-    //                mesh->nodes[i].nodes[2] == NULL ||
-    //                mesh->nodes[i].nodes[3] == NULL
+    //        if(mesh->nodes[i]->nodes[0] == NULL ||
+    //                mesh->nodes[i]->nodes[1] == NULL ||
+    //                mesh->nodes[i]->nodes[2] == NULL ||
+    //                mesh->nodes[i]->nodes[3] == NULL
     //                )
 
-    //            glVertex2d(QtoD(mesh->nodes[i].x), QtoD(mesh->nodes[i].y));
+    //            glVertex2d(QtoD(mesh->nodes[i]->x), QtoD(mesh->nodes[i]->y));
     //    }
     //    glEnd();
 
 
+    glColor4d(1.0, 1.0, 1.0, 0.4);
+    glLineWidth(2.0f);
+    for(tInteger i=0; i<mesh->nnodes; i++)
+    {
+        glBegin(GL_LINES);
+        for(tInteger j=0; j<4;j++)
+            if(mesh->nodes[i]->nodes[j] != NULL)
+            {
+                glVertex2d(mesh->nodes[i]->x, mesh->nodes[i]->y);
+                glVertex2d(mesh->nodes[i]->nodes[j]->x, mesh->nodes[i]->nodes[j]->y);
+            }
+
+        glEnd();
+    }
 
     // Desenha os resultados
     double T0, T1, T2, T3, T4, Tn, R, G, B;
@@ -262,12 +272,12 @@ void Graphics::paintGL()
 
     //    for(int i=0; i<mesh->nelements; i++){
 
-    //        if(mesh->elements[i].index == -1) continue;
+    //        if(mesh->elements[i]->index == -1) continue;
 
-    //        k[0] = mesh->elements[i].nodes[0]->index;
-    //        k[1] = mesh->elements[i].nodes[1]->index;
-    //        k[2] = mesh->elements[i].nodes[2]->index;
-    //        k[3] = mesh->elements[i].nodes[3]->index;
+    //        k[0] = mesh->elements[i]->nodes[0]->index;
+    //        k[1] = mesh->elements[i]->nodes[1]->index;
+    //        k[2] = mesh->elements[i]->nodes[2]->index;
+    //        k[3] = mesh->elements[i]->nodes[3]->index;
 
     //        glBegin(GL_QUADS);
     //        for(int p = 0; p<4; p++){
@@ -285,46 +295,53 @@ void Graphics::paintGL()
 
     int pk[100];
     int count;
-    Node2D *I, *F, *V;
+    Node2D *I, *F;
+
+//    for(tInteger i=0; i<mesh->nelements; i++)
+//        std::cout<<"\n ELEMENT2D "<<i<<"\t"<<mesh->elements[i]/*<<"\t"<<
+//                   mesh->elements[i]->nodes[0]<<"\t"<<mesh->elements[i]->nodes[1]<<"\t"<<
+//                   mesh->elements[i]->nodes[2]<<"\t"<<mesh->elements[i]->nodes[3]*/;
+
 
     for(int i=0; i<mesh->nelements; i++){
 
 
-        if(mesh->elements[i].nodes[0] == NULL||
-                mesh->elements[i].nodes[1] == NULL ||
-                mesh->elements[i].nodes[2] == NULL ||
-                mesh->elements[i].nodes[3] == NULL)
+        if(mesh->elements[i]->nodes[0] == NULL||
+                mesh->elements[i]->nodes[1] == NULL ||
+                mesh->elements[i]->nodes[2] == NULL ||
+                mesh->elements[i]->nodes[3] == NULL)
             continue;
 
-        if(mesh->elements[i].index == -1) continue;
+        if(mesh->elements[i]->index == -1) continue;
 
         count = 0;
-        I = mesh->elements[i].nodes[0];
-        F = mesh->elements[i].nodes[1];
+
+        I = mesh->elements[i]->nodes[0];
+        F = mesh->elements[i]->nodes[1];
         pk[count++] = I->index;
         do{
             I = I->nodes[1];
             pk[count++] = I->index;
         }while(I!=F);
 
-        I = mesh->elements[i].nodes[1];
-        F = mesh->elements[i].nodes[2];
+        I = mesh->elements[i]->nodes[1];
+        F = mesh->elements[i]->nodes[2];
         //pk[count++] = I->index;
         do{
             I = I->nodes[2];
             pk[count++] = I->index;
         }while(I!=F);
 
-        I = mesh->elements[i].nodes[2];
-        F = mesh->elements[i].nodes[3];
+        I = mesh->elements[i]->nodes[2];
+        F = mesh->elements[i]->nodes[3];
         //pk[count++] = I->index;
         do{
             I = I->nodes[3];
             pk[count++] = I->index;
         }while(I!=F);
 
-        I = mesh->elements[i].nodes[3];
-        F = mesh->elements[i].nodes[0];
+        I = mesh->elements[i]->nodes[3];
+        F = mesh->elements[i]->nodes[0];
         //pk[count++] = I->index;
         do{
             I = I->nodes[0];
@@ -362,7 +379,7 @@ void Graphics::paintGL()
             G = Tn<T1? (Tn-T0)/(T1-T0) : Tn>T3 ? (T4-Tn)/(T4-T3) : 1.;
             glColor4d(R,G,B,0.8);
 
-            glVertex2d(mesh->nodes[pk[j]].x, mesh->nodes[pk[j]].y);
+            glVertex2d(mesh->nodes[pk[j]]->x, mesh->nodes[pk[j]]->y);
             //}
 
         }
@@ -375,13 +392,13 @@ void Graphics::paintGL()
     //    for(tInteger i=0; i<30; i++)
 
 
-    //        if(mesh->nodes[i].nodes[1] != NULL
-    //                && mesh->nodes[i].nodes[1]->nodes[2] !=NULL  && mesh->nodes[i].nodes[2] != NULL){
+    //        if(mesh->nodes[i]->nodes[1] != NULL
+    //                && mesh->nodes[i]->nodes[1]->nodes[2] !=NULL  && mesh->nodes[i]->nodes[2] != NULL){
 
-    //        k[0] = mesh->nodes[i].index;
-    //        k[1] = mesh->nodes[i].nodes[1]->index;
-    //        k[2] = mesh->nodes[i].nodes[1]->nodes[2]->index;
-    //        k[3] = mesh->nodes[i].nodes[2]->index;
+    //        k[0] = mesh->nodes[i]->index;
+    //        k[1] = mesh->nodes[i]->nodes[1]->index;
+    //        k[2] = mesh->nodes[i]->nodes[1]->nodes[2]->index;
+    //        k[3] = mesh->nodes[i]->nodes[2]->index;
 
     //        glBegin(GL_QUADS);
     //        for(int p = 0; p<4; p++){
@@ -397,34 +414,29 @@ void Graphics::paintGL()
 
     //    }
 
-    glColor4d(1.0, 1.0, 1.0, 0.5);
-    for(tInteger i=0; i<mesh->nnodes; i++)
-    {
-        glBegin(GL_LINES);
-        for(tInteger j=0; j<4;j++)
-            if(mesh->nodes[i].nodes[j] != NULL)
-            {
-                glVertex2d(mesh->nodes[i].x, mesh->nodes[i].y);
-                glVertex2d(mesh->nodes[i].nodes[j]->x, mesh->nodes[i].nodes[j]->y);
-            }
 
-        glEnd();
-    }
 
 
 
 
     this->drawLegend(T0, T1, T2, T3, T4);
 
-    for(tInteger i=0; i<mesh->nnodes; i++)
-    {
-        QString st0 = QString("%1").arg(static_cast<int>(mesh->nodes[i].index));
-        glColor3f(0.,0.,0.);
-        QFont font10("Ubuntu", 8, QFont::Cursive);
-        this->renderText(QtoD(mesh->nodes[i].x), QtoD(mesh->nodes[i].y) ,0.f,st0,font10);
+//    for(tInteger i=0; i<mesh->nnodes; i++)
+//    {
+//        QString st0 = QString("%1").arg(static_cast<int>(mesh->nodes[i]->index));
+//        glColor3f(0.,0.,0.);
+//        QFont font10("Ubuntu", 8, QFont::Cursive);
+//        this->renderText(QtoD(mesh->nodes[i]->x), QtoD(mesh->nodes[i]->y) ,0.f,st0,font10);
+//    }
 
-
-    }
+//    for(tInteger i=0; i<mesh->nelements; i++)
+//    {
+//        if(mesh->elements[i]->index == -1) continue;
+//        QString st0 = QString("%1").arg(static_cast<int>(mesh->elements[i]->index));
+//        glColor3f(0.,0.,0.);
+//        QFont font10("Ubuntu", 8, QFont::Cursive);
+//        this->renderText(QtoD(mesh->elements[i]->nodes[0]->x), QtoD(mesh->elements[i]->nodes[0]->y) ,0.f,st0,font10);
+//    }
 
 }
 
