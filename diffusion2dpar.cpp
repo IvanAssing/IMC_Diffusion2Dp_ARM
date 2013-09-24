@@ -800,7 +800,7 @@ void Diffusion2DpAR::solver3(tInteger iterationMax, tFloat iterationTolerance, b
                 ap += chy;
             }
 
-            //std::cout<<"\n"<<i<<"\t"<<QtoD(chx)<<"\t"<<QtoD(chy)<<"\t"<<QtoD(ap);
+            //std::cout<<"\n"<<i<<"\t"<<QtoD(chx)<<"\t"<<QtoD(chy)<<"\t"<<QtoD(data->heatSource->operator ()(nodes[i]->x, nodes[i]->y));
 
             sys2(i, i, ap);
             sys2(i, data->heatSource->operator ()(nodes[i]->x, nodes[i]->y));

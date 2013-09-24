@@ -16,7 +16,9 @@ int main(int argc, char *argv[])
 
     Diffusion2DData data;
 
-    data.heatSource = new Constant2D(0.0q); // Sem geração de calor
+    //data.heatSource = new Constant2D(0.0q); // Sem geração de calor
+    //data.heatSource = new Sine2(-4.q*M_PIq*M_PIq, 2.q*M_PIq, 0.0q);
+    data.heatSource = new SFAS2();
     data.k = 1.0q;
 
 
@@ -26,21 +28,25 @@ int main(int argc, char *argv[])
     Sine ccS(1.0q, M_PIq, 0.0q);
 
     Boundary2D south(Dirichlet, &cc0);
-    Boundary2D north(Dirichlet, &ccS);
+    //Boundary2D north(Dirichlet, &ccS);
+    Boundary2D north(Dirichlet, &cc0);
     Boundary2D east(Dirichlet, &cc0);
     Boundary2D west(Dirichlet, &cc0);
 
 
     tFloat lx = 1.0q;
     tFloat ly = 1.0q;
-    tInteger nx = 5;
-    tInteger ny = 5;
+    tInteger nx = 11;
+    tInteger ny = 11;
 
     tFloat TmAS = 2.0q*lx * (coshq(M_PIq*ly/lx) - 1.0q) / (M_PIq*M_PIq*ly*sinhq(M_PIq*ly/lx));
+    //tFloat TmAS = 0.0q;
     Diffusion2DpAR mesh(lx, ly, nx, ny, &data, &south, &north, &east, &west);
 
 
-    SFAS as(1.0q, 1.0q);
+    //SFAS as(1.0q, 1.0q);
+    //Sine2 as(1.0q, 2.q*M_PIq, 0.0q);
+    SFAS2a as;
 
     // 1
     mesh.solver3(100000, 1.0e-28q, true); // itmax, itol, plotlog?
@@ -51,7 +57,7 @@ int main(int argc, char *argv[])
     tInteger nne = mesh.nelements;
 
 
-    for(int z=0; z<3; z++)
+    for(int z=1; z<4; z++)
     {
         nne = mesh.nelements;
         for(int k=0; k<nne; k++)
@@ -66,7 +72,9 @@ int main(int argc, char *argv[])
                 Ta += as(mesh.elements[k]->nodes[i]->x, mesh.elements[k]->nodes[i]->y)/4.0q;
             }
 
-            if(fabsq(Ta - Tn)>1.0e-5q)
+            //if(fabsq(Ta - Tn)>(1.0e-4q/((z+1)*1.0e-2q)))
+                if(fabsq(Ta - Tn)>4.0e-3q)
+            //if(fabsq(Ta - Tn)>fabsq(1.0e-2q*(z*1.0e-1q)))
                 mesh.refine(mesh.elements[k]);
         }
 
@@ -85,6 +93,7 @@ int main(int argc, char *argv[])
     for(int i=0; i<mesh.nnodes; i++)
     {
         erro[i] = fabsq(as(mesh.nodes[i]->x, mesh.nodes[i]->y)-mesh.T[i]);
+        //erro[i] = as(mesh.nodes[i]->x, mesh.nodes[i]->y);
         //std::cout<<"\n"<<i<<"\t"<<print(as(mesh.nodes[i]->x, mesh.nodes[i]->y))<<"\t"<<print(mesh.T[i])<<"\t"<<print(erro[i]);
     }
 
